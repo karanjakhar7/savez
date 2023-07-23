@@ -1,0 +1,17 @@
+{% extends "base.html" %} {% block title %}Search{% endblock %} {% block
+    content %}
+    <!-- <h1>Search Results for "{{ query }}"</h1> -->
+    <ul>
+        {% for post in posts %}
+            <li><b>{{ post.title }}</b></li>
+            {{ post.text }}
+            <form action="/save" method="post">
+                <input type="hidden" name="post_id" value="{{ post.id }}">
+                <input type="hidden" name="title" value="{{ post.title }}">
+                <input type="hidden" name="text" value="{{ post.text }}">
+                <button type="submit">Save</button>
+            </form>
+            
+        {% endfor %}
+    </ul>
+    {% endblock %}

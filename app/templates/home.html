@@ -1,0 +1,26 @@
+{% extends "base.html" %} {% block title %}Home{% endblock %} {% block content
+  %}
+  <h1 align="center">Search Posts</h1>
+  <!-- <ul class="list-group list-group-flush" id="notes">
+    {% for note in posts %}
+    <li class="list-group-item">
+      {{ note.data }}
+      <button type="button" class="close" onClick="deleteNote({{ note.id }})">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </li>
+    {% endfor %}
+  </ul> -->
+  <form action="/search" method="POST">
+    <label for="search_text">Tweet</label>
+    <input
+      type="search_text"
+      class="form-control"
+      id="search_text"
+      name="search_text"
+      placeholder="Search for tweets"
+    />
+  <br />
+  <button type="submit" class="btn btn-primary">Search</button>
+</form>
+  {% endblock %}
