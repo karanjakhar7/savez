@@ -2,12 +2,17 @@
     %}
 
 <h1 align="center">Posts</h1>
-<ul class="list-group list-group-flush" id="notes">
-    {% for post in posts %}
-        <li><b>{{ post.title }}</b></li>
-            {{ post.text }}
-    <!-- <button type="button" class="close" onClick="deleteNote({{ post.id }})"> -->
-    </li>
+<ul class="list-group list-group-flush" id="posts">
+    {% for post in posts %}        
+        {% if post.category %}
+        <li><b>{{ post.title }}</b> ({{post.category}}) <button type="button" class="btn btn-danger btn-sm" onClick="deletePost({{ post.id }})">Delete</button></li>
+        {{ post.text }}
+        {% else %}
+        <li><b>{{ post.title }}</b> <button type="button" class="btn btn-danger btn-sm" onClick="deletePost({{ post.id }})">Delete</button> </li>
+        {{ post.text }}
+        {% endif %}
+        <br>
+        
     {% endfor %}
 </ul>
 {% endblock %}

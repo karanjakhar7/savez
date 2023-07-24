@@ -5,11 +5,51 @@
         {% for post in posts %}
             <li><b>{{ post.title }}</b></li>
             {{ post.text }}
-            <form action="/save" method="post">
+            <form action="/save" method="post" id="categoryForm">
                 <input type="hidden" name="post_id" value="{{ post.id }}">
                 <input type="hidden" name="title" value="{{ post.title }}">
                 <input type="hidden" name="text" value="{{ post.text }}">
-                <button type="submit">Save</button>
+                <div class="row mb-4">
+                    <!-- <div class="col text-center"> -->
+                      <a href="#" class="btn btn-sm btn-primary" data-toggle="modal" data-target="#modal{{loop.index}}">Save</a>
+                    <!-- </div> -->
+                    <!-- modal code -->
+                    <div class="modal fade" id="modal{{loop.index}}" tabindex="-1" role="dialog" aria-labelledby="basicModal" aria-hidden="true">
+                        <div class="modal-dialog">
+                          <div class="modal-content">
+                            <div class="modal-header">
+                              <h4 class="modal-title" id="myModalLabel">Choose category</h4>
+                              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                              </button>
+                            </div>
+                            <div class="modal-body">
+                                {% for cat in user_categories %}
+                                <label>
+                                <input type="radio" name="category" value="{{cat}}"> {{cat}}
+                                </label>
+                                <br>
+                                {% endfor %}
+                                <label for="newCategory">New Category</label>
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    id="newCategory"
+                                    name="newCategory"
+                                    placeholder="New category"
+                                />
+                            </div>
+                            <div class="modal-footer">
+                              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                              <!-- <button type="button" class="btn btn-primary", id="categorySubmit">Save</button> -->
+                              <button type="submit" class="btn btn-primary">Save</button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                  </div>
+                  <!-- <button type="submit" class="btn btn-primary">Save</button> -->
             </form>
             
         {% endfor %}
