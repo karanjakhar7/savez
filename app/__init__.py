@@ -11,7 +11,7 @@ def create_app():
     app = Flask(__name__)
     app.config['SECRET_KEY'] = 'karan'
     app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{DB_NAME}'
-    # app.config['SQLALCHEMY_DATABASE_URI'] = "cockroachdb://karan:REVEAL_PASSWORD@tamer-locust-5113.6xw.cockroachlabs.cloud:26257/defaultdb?sslmode=verify-full"
+    # app.config['SQLALCHEMY_DATABASE_URI'] = "cockroachdb://karan:HsoEzTeCQVtE08ldeM4OCA@tamer-locust-5113.6xw.cockroachlabs.cloud:26257/defaultdb?sslmode=require"
     db.init_app(app)
 
     from .views import views
@@ -23,6 +23,7 @@ def create_app():
     from .models import User, Post
     
     with app.app_context():
+        # db.drop_all()
         db.create_all()
 
     login_manager = LoginManager()

@@ -29,28 +29,6 @@ def search_reddit(keyword, subreddit='all', sort='new', limit=50):
 
 views = Blueprint('views', __name__)
 
-# reddit_posts = [
-#     {
-#         "title": "First Post",
-#         "text": "Hello Reddit! This is my first post on this awesome platform."
-#     },
-#     {
-#         "title": "Exciting News",
-#         "text": "I just got accepted into my dream college! I can't believe it!"
-#     },
-#     {
-#         "title": "Subreddit Recommendation",
-#         "text": "Hey everyone, do you know any interesting subreddits about science and technology?"
-#     },
-#     {
-#         "title": "Funny Cat Video",
-#         "text": "Check out this hilarious cat video I found! It made my day."
-#     },
-#     {
-#         "title": "Discussion Topic",
-#         "text": "What are your thoughts on climate change? Let's have a meaningful discussion."
-#     }
-# ]
 
 
 @views.route('/', methods=['GET','POST'])
@@ -64,18 +42,26 @@ def home():
 
     return render_template("home.html", user=current_user)
 
+reddit_posts_global = []
+
 @views.route('/search', methods=['GET', 'POST'])
 def search():
     # print(Post.query.all())
+    global reddit_posts_global
     print(request.form.get('search_text')) # DO THE SEARCH HERE
-
-    reddit_posts = search_reddit(request.form.get('search_text'))
-    print(reddit_posts)
+    if request.form.get('search_text'):
+        reddit_posts = search_reddit(request.form.get('search_text'))
+        reddit_posts_global = reddit_posts
+    else:
+        reddit_posts = reddit_posts_global
+    # print(reddit_posts)
     user_categories = set()
     for post in current_user.saved:
         user_categories.add(post.category)
     # print(user_categories)
-    return render_template("search.html", posts=reddit_posts, user=current_user, user_categories=list(user_categories))
+    user_categories = list(user_categories)
+    user_categories = [x for x in user_categories if x not in [None,'']]
+    return render_template("search.html", posts=reddit_posts, user=current_user, user_categories=user_categories)
 
 @views.route('/save', methods=['POST'])
 def save_post():
