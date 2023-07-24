@@ -2,17 +2,18 @@
     %}
 
 <h1 align="center">Posts</h1>
-<ul class="list-group list-group-flush" id="posts">
-    {% for post in posts %}        
-        {% if post.category %}
-        <li><b>{{ post.title }}</b> ({{post.category}}) <button type="button" class="btn btn-danger btn-sm" onClick="deletePost({{ post.id }})">Delete</button></li>
-        {{ post.text }}
-        {% else %}
+    {% for cat_dict in posts %}
+    <H2>{{cat_dict.category}}</H2>
+    <ul class="list-group list-group-flush" id="posts">
+        {% for post in cat_dict.posts %}
         <li><b>{{ post.title }}</b> <button type="button" class="btn btn-danger btn-sm" onClick="deletePost({{ post.id }})">Delete</button> </li>
         {{ post.text }}
-        {% endif %}
         <br>
-        
+        {% endfor %}
+    </ul>
+    <br>
+    <br>
     {% endfor %}
-</ul>
+
+
 {% endblock %}
