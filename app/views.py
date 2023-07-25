@@ -5,7 +5,8 @@ from . import db
 import json
 import praw
 import os
-
+import requests
+from currentsapi import CurrentsAPI
 
 reddit = praw.Reddit(
     client_id=os.getenv('REDDIT_CLIENT_ID'),
@@ -14,6 +15,34 @@ reddit = praw.Reddit(
     # username=os.getenv('REDDIT_USERNAME'),
     # password=os.getenv('REDDIT_PASSWORD')",
 )
+
+news_api = CurrentsAPI(api_key=os.getenv('CURRENTS_API_KEY'))
+
+def search_news(keyword, limit=10):
+    posts = news_api.search(keywords=keyword, limit=10, language='en')
+    res = []
+    for post in posts['news']:
+        res.append({'title': post['title'], 'text': post['description']})
+    return res[:limit]
+
+def wiki_search(keyword, char_limit=400, limit=10):
+  # Search Wikipedia to get page IDs
+  search_url = f"https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch={keyword}&format=json"
+  search_response = requests.get(search_url)
+  search_data = search_response.json()
+
+  results = []
+  for page in search_data['query']['search'][:limit]:
+    id = page['pageid']
+    # print(id)
+    extract_url = f"https://en.wikipedia.org/w/api.php?format=json&action=query&prop=extracts&exintro&explaintext&exchars={char_limit}&pageids={id}"
+    extract_response = requests.get(extract_url)
+    extract_data = extract_response.json()
+
+    extract_text = list(extract_data['query']['pages'].values())[0]['extract']
+    title = list(extract_data['query']['pages'].values())[0]['title']
+    results.append({'title': title, 'text':extract_text})
+  return results
 
 IMAGE_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.gif', '.bmp']
 
@@ -44,26 +73,26 @@ def home():
 
     return render_template("home.html", user=current_user)
 
-reddit_posts_global = []
+posts_global = []
 
 @views.route('/search', methods=['GET', 'POST'])
 def search():
     # print(Post.query.all())
-    global reddit_posts_global
-    print(request.form.get('search_text')) # DO THE SEARCH HERE
+    global posts_global
+    # print(request.form.get('search_text')) # DO THE SEARCH HERE
     if request.form.get('search_text'):
-        reddit_posts = search_reddit(request.form.get('search_text'))
-        reddit_posts_global = reddit_posts
+        posts = search_news(request.form.get('search_text'))
+        posts_global = posts
     else:
-        reddit_posts = reddit_posts_global
-    # print(reddit_posts)
+        posts = posts_global
+    # print(posts)
     user_categories = set()
     for post in current_user.saved:
         user_categories.add(post.category)
     # print(user_categories)
     user_categories = list(user_categories)
     user_categories = [x for x in user_categories if x not in [None,'']]
-    return render_template("search.html", posts=reddit_posts, user=current_user, user_categories=user_categories)
+    return render_template("search.html", posts=posts, user=current_user, user_categories=user_categories)
 
 @views.route('/save', methods=['POST'])
 def save_post():
@@ -131,9 +160,9 @@ def delete_post(post_id):
     # Your code to delete the post with the given ID from the database
     # For example, you could use an ORM like SQLAlchemy to perform the deletion
     # Make sure to handle any errors or validations as needed
-    print("postid:", post_id)
+    # print("postid:", post_id)
     post = Post.query.get(post_id)
-    print("post: ", post)
+    # print("post: ", post)
     if post:
         if post.user_id == current_user.id:
             db.session.delete(post)
