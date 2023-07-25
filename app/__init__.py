@@ -2,6 +2,9 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from os import path
 from flask_login import LoginManager
+import os
+from dotenv import load_dotenv
+load_dotenv()
 
 db = SQLAlchemy()
 DB_NAME = "database.db"
@@ -9,9 +12,9 @@ DB_NAME = "database.db"
 
 def create_app():
     app = Flask(__name__)
-    app.config['SECRET_KEY'] = 'karan'
-    app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{DB_NAME}'
-    # app.config['SQLALCHEMY_DATABASE_URI'] = "cockroachdb://karan:HsoEzTeCQVtE08ldeM4OCA@tamer-locust-5113.6xw.cockroachlabs.cloud:26257/defaultdb?sslmode=require"
+    app.config['SECRET_KEY'] = os.getenv('FLASK_SECRET_KEY')
+    # app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{DB_NAME}'
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
     db.init_app(app)
 
     from .views import views

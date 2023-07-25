@@ -4,13 +4,15 @@ from .models import Post
 from . import db
 import json
 import praw
+import os
+
 
 reddit = praw.Reddit(
-    client_id="9uCqLjONJDLFDh8vDb22-g",
-    client_secret="kH8x0BrGo1OeTDzpz5pA3CrZWyBTuQ",
-    user_agent="Temp by /u/thecockydev",
-    # username="thecockydev",
-    # password="password10026",
+    client_id=os.getenv('REDDIT_CLIENT_ID'),
+    client_secret=os.getenv('REDDIT_CLIENT_SECRET'),
+    user_agent=os.getenv('REDDIT_USER_AGENT'),
+    # username=os.getenv('REDDIT_USERNAME'),
+    # password=os.getenv('REDDIT_PASSWORD')",
 )
 
 IMAGE_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.gif', '.bmp']
