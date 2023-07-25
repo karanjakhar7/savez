@@ -7,6 +7,7 @@ import praw
 import os
 import requests
 from currentsapi import CurrentsAPI
+from joblib import delayed, Parallel
 
 reddit = praw.Reddit(
     client_id=os.getenv('REDDIT_CLIENT_ID'),
@@ -21,28 +22,41 @@ news_api = CurrentsAPI(api_key=os.getenv('CURRENTS_API_KEY'))
 def search_news(keyword, limit=10):
     posts = news_api.search(keywords=keyword, limit=10, language='en')
     res = []
-    for post in posts['news']:
+    for post in posts['news'][:limit]:
         res.append({'title': post['title'], 'text': post['description']})
-    return res[:limit]
+    return res
 
-def wiki_search(keyword, char_limit=400, limit=10):
-  # Search Wikipedia to get page IDs
-  search_url = f"https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch={keyword}&format=json"
-  search_response = requests.get(search_url)
-  search_data = search_response.json()
-
-  results = []
-  for page in search_data['query']['search'][:limit]:
-    id = page['pageid']
+def wiki_helper(page_id, char_limit=400):
     # print(id)
-    extract_url = f"https://en.wikipedia.org/w/api.php?format=json&action=query&prop=extracts&exintro&explaintext&exchars={char_limit}&pageids={id}"
+    extract_url = f"https://en.wikipedia.org/w/api.php?format=json&action=query&prop=extracts&exintro&explaintext&exchars={char_limit}&pageids={page_id}"
     extract_response = requests.get(extract_url)
     extract_data = extract_response.json()
 
     extract_text = list(extract_data['query']['pages'].values())[0]['extract']
     title = list(extract_data['query']['pages'].values())[0]['title']
-    results.append({'title': title, 'text':extract_text})
-  return results
+    return {'title': title, 'text':extract_text}
+
+def wiki_search(keyword, char_limit=400, limit=10):
+  # Search Wikipedia to get page IDs
+    import time
+    start = time.monotonic()
+    search_url = f"https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch={keyword}&format=json"
+    search_response = requests.get(search_url)
+    search_data = search_response.json()
+
+    mid = time.monotonic()
+    print('time to search: ', mid - start)
+
+    # results = []
+    # for page in search_data['query']['search'][:limit]:
+    #     results.append(wiki_helper(page['pageid'], char_limit))
+
+    results = Parallel(n_jobs=10)(delayed(wiki_helper)(page['pageid'], char_limit) for page in search_data['query']['search'][:limit])
+
+    end = time.monotonic()
+    print('time to get extracts: ', end - mid)
+    print('total: ', end - start)
+    return results
 
 IMAGE_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.gif', '.bmp']
 
@@ -80,20 +94,26 @@ posts_global = []
 @login_required
 def search():
     # print(Post.query.all())
+    # import time
+    # start = time.monotonic()
     global posts_global
     # print(request.form.get('search_text')) # DO THE SEARCH HERE
     if request.form.get('search_text'):
-        posts = search_news(request.form.get('search_text'))
+        posts = wiki_search(request.form.get('search_text'))
         posts_global = posts
     else:
         posts = posts_global
     # print(posts)
+    # mid = time.monotonic()
+    # print('time to search: ', mid - start)
     user_categories = set()
     for post in current_user.saved:
         user_categories.add(post.category)
     # print(user_categories)
     user_categories = list(user_categories)
     user_categories = [x for x in user_categories if x not in [None,'']]
+    # print('time for db: ', time.monotonic() - mid)
+    # print('total: ', time.monotonic() - start)
     return render_template("search.html", posts=posts, user=current_user, user_categories=user_categories)
 
 @views.route('/save', methods=['POST'])
