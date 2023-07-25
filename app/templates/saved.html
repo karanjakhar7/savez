@@ -6,7 +6,7 @@
     <H2>{{cat_dict.category}}</H2>
     <ul class="list-group list-group-flush" id="posts">
         {% for post in cat_dict.posts %}
-        <li><b>{{ post.title }}</b> ID: {{ post.id }}
+        <li><b>{{ post.title }}</b></li>
             <form method="post" action="/delete_post/{{ post.id }}">
                 <button type="submit" class="btn btn-danger btn-sm">Delete</button>
               </form>
