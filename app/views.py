@@ -89,7 +89,7 @@ def saved():
     for post in current_user.saved:
         if post.data:
             user_posts.append({**json.loads(post.data),**{'category': post.category, 'id': post.id}})
-
+        print("id: ",post.id)
     pivoted_data = {}
 
 # Loop through each post and group them by category
@@ -107,15 +107,37 @@ def saved():
     pivoted_list = list(pivoted_data.values())
     return render_template("saved.html", user=current_user, posts=pivoted_list)
 
-@login_required
-@views.route('/delete-post', methods=['POST'])
-def delete_post():  
-    post = json.loads(request.data) # this function expects a JSON from the INDEX.js file
-    postId = post['postId']
-    post = Post.query.get(postId)
+# @login_required
+# @views.route('/delete-post', methods=['POST'])
+# def delete_post():  
+#     post = json.loads(request.data) # this function expects a JSON from the INDEX.js file
+#     print("post", post)
+#     postId = post['postId']
+#     print("postid:", postId)
+#     post = Post.query.get(postId)
+#     print("post: ", post)
+#     if post:
+#         print('yes')
+#         if post.user_id == current_user.id:
+#             db.session.delete(post)
+#             db.session.commit()
+
+#     return redirect(url_for('views.saved'))
+
+
+
+@views.route('/delete_post/<int:post_id>', methods=['POST'])
+def delete_post(post_id):
+    # Your code to delete the post with the given ID from the database
+    # For example, you could use an ORM like SQLAlchemy to perform the deletion
+    # Make sure to handle any errors or validations as needed
+    print("postid:", post_id)
+    post = Post.query.get(post_id)
+    print("post: ", post)
     if post:
         if post.user_id == current_user.id:
             db.session.delete(post)
             db.session.commit()
 
+    # After deleting the post, you can redirect the user to the page with the list of posts
     return redirect(url_for('views.saved'))
