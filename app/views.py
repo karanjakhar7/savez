@@ -63,6 +63,7 @@ views = Blueprint('views', __name__)
 
 
 @views.route('/', methods=['GET','POST'])
+@login_required
 def home():
     if request.method == 'POST':
         text = request.form['search_text']
@@ -76,6 +77,7 @@ def home():
 posts_global = []
 
 @views.route('/search', methods=['GET', 'POST'])
+@login_required
 def search():
     # print(Post.query.all())
     global posts_global
